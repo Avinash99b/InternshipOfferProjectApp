@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="css/index.css"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Login</title>
 
     <!-- jQuery Library -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -16,39 +16,85 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <title>Employee Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
 </head>
-<body>
-<h1>Employee Management System</h1>
-<button class="btn btn-success" style="margin-bottom: 30px;margin-left: 10px" onclick="showAddForm()">Add Employee</button>
-<table id="employeeTable" class="display" style="width:100%">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Department</th>
-        <th>Position</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<body class="h-screen flex items-center justify-center bg-gray-100">
+<div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center mb-6">Employee Login</h1>
+    <form id="loginForm" class="space-y-4">
+        <div>
+            <label for="employeeId" class="block text-gray-700 font-semibold">Employee ID</label>
+            <input type="number" id="employeeId" required class="w-full p-3 border rounded-lg" />
+        </div>
+        <div>
+            <label for="password" class="block text-gray-700 font-semibold">Password</label>
+            <input type="password" id="password" required class="w-full p-3 border rounded-lg" />
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600">Login</button>
+    </form>
+    <p id="errorMessage" class="text-red-500 mt-4 hidden">Invalid Employee ID or Password</p>
+</div>
+<script src="js/constants.js"></script>
+<script>
 
-<form id="employeeForm" style="display:none;">
-    <input type="hidden" id="employeeId"/>
-    <label>Name: <input type="text" id="name" required/></label>
-    <label>Department ID: <select id="departmentId" required>
+    $(document).ready(function() {
+        if(getCookie('token')) {
+            window.location.href = 'dashboard.html';
+        }
+    });
 
-    </select></label>
-    <label>Position ID: <select id="positionId" required>
+    function setCookie(name, value, days) {
+        const expires = new Date();
+        expires.setDate(expires.getDate() + days);
+        document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+    }
 
-    </select></label>
-    <button type="button" onclick="saveEmployee()">Save</button>
-    <button type="button" onclick="cancelForm()">Cancel</button>
-</form>
 
-<script src="js/script.js"></script>
-<script src="js/api.js"></script>
+    function getCookie(name) {
+        const cookies = document.cookie.split('; ');
+        for (const cookie of cookies) {
+            const [key, value] = cookie.split('=');
+            if (key === name) {
+                return decodeURIComponent(value);
+            }
+        }
+        return null; // Return null if not found
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const employeeId = document.getElementById('employeeId').value;
+        const password = document.getElementById('password').value;
+
+        if (!employeeId || !password) {
+            document.getElementById('errorMessage').textContent = 'Both fields are required.';
+            document.getElementById('errorMessage').classList.remove('hidden');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${getBaseUrl()}/users/login`, {
+                method: 'POST',
+                credentials:"omit",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employee_id: parseInt(employeeId), password })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setCookie('token', result.token, 1);
+                window.location.href = 'dashboard.html';
+            } else {
+                document.getElementById('errorMessage').textContent = result.message || 'Invalid Employee ID or Password';
+                document.getElementById('errorMessage').classList.remove('hidden');
+            }
+        } catch (error) {
+            document.getElementById('errorMessage').textContent = 'An error occurred. Please try again later.';
+            document.getElementById('errorMessage').classList.remove('hidden');
+        }
+    });
+</script>
 </body>
 </html>

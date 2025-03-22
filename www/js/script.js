@@ -4,12 +4,21 @@ $(document).ready(function () {
 });
 
 async function fetchDepartments() {
-    const response = await fetch('http://localhost:8080/InternshipOfferProject/departments');
+    const response = await fetch(`${getBaseUrl()}/departments`,{
+        headers:{
+            'Authorization':getCookie('token')
+        }
+    });
     return response.json();
 }
 
 async function fetchPositions() {
-    const response = await fetch('http://localhost:8080/InternshipOfferProject/positions');
+    const response = await fetch(`${getBaseUrl()}/positions` ,{
+        method:"GET",
+        headers:{
+            'Authorization':getCookie('token')
+        }
+    });
     return response.json();
 }
 
@@ -67,6 +76,7 @@ async function saveEmployee() {
     }
     if (result) {
         alert(result);
+        location.reload();
     } else {
         alert('Employee Saved!');
         location.reload();

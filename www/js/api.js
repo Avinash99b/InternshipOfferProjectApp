@@ -1,30 +1,38 @@
-const API_URL = 'http://localhost:8080/InternshipOfferProject/employees';
-
 async function fetchEmployees() {
-    const response = await fetch(API_URL);
+    const response = await fetch(getBaseUrl()+"/employees",{
+        headers:{
+            'Authorization':getCookie('token')
+        }
+    });
     return response.json();
 }
 
 async function getEmployee(id) {
-    const response = await fetch(`${API_URL}/${id}`);
+    const response = await fetch(`${getBaseUrl()}/employees/${id}`,{
+        headers:{
+            'Authorization':getCookie('token')
+        }
+    });
     return response.json();
 }
 
 async function addEmployee(data) {
-    let result = await fetch(API_URL, {
+    let result = await fetch(getBaseUrl()+"/employees", {
         method: 'POST',
         body: JSON.stringify(data),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json',
+        'Authorization':getCookie('token')},
     });
     result = await result.json();
     return result.status !== 200? result.message : null;
 }
 
 async function updateEmployee(id, data) {
-    let result = await fetch(`${API_URL}/${id}`, {
+    let result = await fetch(`${getBaseUrl()}/employees/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json',
+        'Authorization':getCookie('token')},
     });
 
     result = await result.json();
@@ -32,7 +40,8 @@ async function updateEmployee(id, data) {
 }
 
 async function deleteEmployee(id) {
-    await fetch(`${API_URL}/${id}`, {
+    await fetch(`${getBaseUrl()}/employees/${id}`, {
         method: 'DELETE',
+        headers: {'Authorization':getCookie('token')}
     });
 }
